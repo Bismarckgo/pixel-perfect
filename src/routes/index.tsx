@@ -1,237 +1,223 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import {
-  Music, Brain, CheckSquare, Folder, Zap, BookOpen, Lightbulb, SquareStack,
-  Server, Clapperboard, Settings, Play, Inbox as InboxIcon, Plus, SkipBack, SkipForward,
-} from "lucide-react";
-import { useCerebro, captureIdea, setState } from "@/lib/cerebro-store";
-import { Donna } from "@/components/cerebro/Donna";
+import { Play, Check, AlertTriangle, X, Undo2, MapPin } from "lucide-react";
+import { useCerebro, setState } from "@/lib/cerebro-store";
+import { toggleDonna } from "@/components/cerebro/Donna";
+import { demoEvents, demoFocusTasks, demoGoals, demoReceipts } from "@/lib/demo-data";
+import { describe, fetchWeather, geocodeCity, usePlace } from "@/lib/weather";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Cerebro — Personal Life OS" },
-      { name: "description", content: "Cerebro: el sistema operativo visual de tu vida, tu trabajo creativo y tus proyectos." },
-      { property: "og:title", content: "Cerebro — Personal Life OS" },
-      { property: "og:description", content: "El sistema operativo visual de tu vida creativa." },
+      { title: "Hoy — Cerebro" },
+      { name: "description", content: "Lo que estás haciendo ahora, tu día y lo que Donna hizo por ti." },
+      { property: "og:title", content: "Hoy — Cerebro" },
+      { property: "og:description", content: "Lo que estás haciendo ahora, tu día y lo que Donna hizo por ti." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: Home,
+  component: Hoy,
 });
 
-const apps = [
-  { name: "Música", icon: Music, tone: "bg-signal-gradient" },
-  { name: "Proyectos", icon: Brain, tone: "bg-primary" },
-  { name: "Tareas", icon: CheckSquare, tone: "bg-success" },
-  { name: "Archivos", icon: Folder, tone: "bg-cyan" },
-  { name: "Automatizar", icon: Zap, tone: "bg-signal" },
-  { name: "Conocimiento", icon: BookOpen, tone: "bg-secondary" },
-  { name: "Ideas", icon: Lightbulb, tone: "bg-secondary" },
-  { name: "Decisiones", icon: SquareStack, tone: "bg-secondary" },
-  { name: "Servidor", icon: Server, tone: "bg-secondary" },
-  { name: "Ocio", icon: Clapperboard, tone: "bg-secondary" },
-  { name: "Sistema", icon: Settings, tone: "bg-secondary" },
-];
+const Demo = () => <span className="rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">demo</span>;
 
-function useNow() {
-  const [now, setNow] = useState<Date | null>(null);
+function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <section className={`rounded-3xl surface p-5 ${className}`}>{children}</section>;
+}
+
+function useGreeting() {
+  const [g, setG] = useState("Hola");
   useEffect(() => {
-    setNow(new Date());
-    const t = setInterval(() => setNow(new Date()), 1000 * 15);
-    return () => clearInterval(t);
+    const h = new Date().getHours();
+    setG(h >= 16 && h < 19 ? "Buenas tardes" : h >= 19 || h < 5 ? "Buenas noches" : "Buen día");
   }, []);
-  return now;
+  return g;
 }
 
-function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`rounded-3xl glass p-5 ${className}`}>{children}</section>;
-}
-
-function Home() {
+function DonnaHero() {
+  const greet = useGreeting();
   const s = useCerebro();
-  const now = useNow();
-  const [idea, setIdea] = useState("");
-  const hour = now?.getHours() ?? 9;
-  const greet = hour < 12 ? "Buenos días" : hour < 20 ? "Buenas tardes" : "Buenas noches";
-
   return (
-    <main className="mx-auto max-w-7xl px-5 pb-40 pt-8 md:px-8">
-      <header className="mb-8 flex items-end justify-between">
-        <div>
-          <p className="label-os">cerebro · personal os</p>
-          <h1 className="mt-2 text-3xl font-semibold md:text-4xl">{greet}, Bismarck.</h1>
-        </div>
-        <div className="text-right">
-          <p className="font-mono text-4xl font-medium tabular-nums md:text-6xl">
-            {now ? now.toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" }) : "--:--"}
-          </p>
-          <p className="label-os mt-1">
-            {now ? now.toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" }) : ""}
-          </p>
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-        {/* AHORA */}
-        <Card className="relative overflow-hidden md:col-span-7 md:row-span-2 md:p-8">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-signal opacity-20 blur-3xl" />
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-signal glow-signal" />
-            <p className="label-os">ahora · {s.task.area}</p>
-          </div>
-          <p className="mt-6 text-5xl">{s.task.icon}</p>
-          <h2 className="mt-4 max-w-lg text-3xl font-semibold leading-tight md:text-5xl">{s.task.title}</h2>
-          <div className="mt-6 border-l-2 border-signal pl-4">
-            <p className="label-os">siguiente acción</p>
-            <p className="mt-1 text-lg">{s.task.next}</p>
-          </div>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              to="/focus"
-              className="inline-flex items-center gap-2 rounded-full bg-signal-gradient px-7 py-3.5 font-display font-semibold text-signal-foreground glow-signal transition hover:scale-[1.02]"
-            >
-              <Play className="h-4 w-4 fill-current" /> Empezar
-            </Link>
-            <div className="flex rounded-full border p-1">
-              {[25, 50].map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setState((x) => ({ ...x, duration: m }))}
-                  className={`rounded-full px-4 py-2 font-mono text-xs ${s.duration === m ? "bg-accent text-foreground" : "text-muted-foreground"}`}
-                >
-                  {m} min
-                </button>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        {/* PRIORIDADES */}
-        <Card className="md:col-span-5">
-          <p className="label-os">prioridades</p>
-          <ol className="mt-4 space-y-2">
-            {s.priorities.map((p, i) => (
-              <li key={p} className="flex items-center gap-4 rounded-2xl bg-background/30 px-4 py-3">
-                <span className={`font-mono text-2xl font-medium ${i === 0 ? "text-signal" : "text-muted-foreground"}`}>0{i + 1}</span>
-                <span className="font-display text-lg font-medium">{p}</span>
-              </li>
-            ))}
-          </ol>
-        </Card>
-
-        {/* FOCO DEL DÍA */}
-        <Card className="md:col-span-2">
-          <p className="label-os">pomodoros</p>
-          <p className="mt-3 font-mono text-5xl font-medium text-primary">{s.pomodoros}</p>
-          <p className="mt-1 text-xs text-muted-foreground">completados</p>
-        </Card>
-
-        {/* SERVIDOR */}
-        <Card className="md:col-span-3">
-          <div className="flex items-center justify-between">
-            <p className="label-os">servidor</p>
-            <span className="flex items-center gap-1.5 text-xs text-success">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" /> Online
-            </span>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-            {[["CPU", "18%"], ["RAM", "41%"], ["Disco", "62%"]].map(([k, v]) => (
-              <div key={k}>
-                <p className="font-mono text-lg">{v}</p>
-                <p className="label-os">{k}</p>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 text-xs text-muted-foreground">Docker · PostgreSQL · n8n — todo funcionando</p>
-        </Card>
-
-        {/* INBOX */}
-        <Card className="md:col-span-5">
-          <div className="flex items-center justify-between">
-            <p className="label-os flex items-center gap-2"><InboxIcon className="h-3 w-3" /> inbox</p>
-            <span className="font-mono text-xs text-muted-foreground">{s.inbox.length}</span>
-          </div>
-          <form
-            onSubmit={(e) => { e.preventDefault(); captureIdea(idea); setIdea(""); }}
-            className="mt-3 flex items-center gap-2 rounded-2xl border bg-background/30 px-3 py-2"
-          >
-            <Plus className="h-4 w-4 text-muted-foreground" />
-            <input
-              value={idea}
-              onChange={(e) => setIdea(e.target.value)}
-              placeholder="Capturar idea…"
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            />
-          </form>
-          <ul className="mt-3 space-y-1">
-            {s.inbox.slice(0, 4).map((i) => (
-              <li key={i.id} className="flex items-center justify-between rounded-xl px-2 py-1.5 text-sm hover:bg-accent/50">
-                <span className="truncate">{i.text}</span>
-                <button
-                  onClick={() => setState((x) => ({ ...x, inbox: x.inbox.filter((y) => y.id !== i.id) }))}
-                  className="label-os hover:text-foreground"
-                >
-                  hecho
-                </button>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        {/* MÚSICA */}
-        <Card className="md:col-span-4">
-          <p className="label-os">en reproducción</p>
-          <div className="mt-4 flex items-center gap-4">
-            <div className="h-14 w-14 shrink-0 rounded-2xl bg-signal-gradient" />
-            <div className="min-w-0">
-              <p className="truncate font-display font-medium">Chicas malas — mix v7</p>
-              <p className="font-mono text-xs text-muted-foreground">94 BPM · Am</p>
-            </div>
-          </div>
-          <div className="mt-4 flex h-8 items-end gap-[3px]">
-            {Array.from({ length: 40 }).map((_, i) => (
-              <span key={i} className="flex-1 rounded-full bg-cyan/70" style={{ height: `${20 + Math.abs(Math.sin(i * 1.7)) * 80}%` }} />
-            ))}
-          </div>
-          <div className="mt-3 flex justify-center gap-6 text-muted-foreground">
-            <SkipBack className="h-4 w-4" /><Play className="h-4 w-4 text-foreground" /><SkipForward className="h-4 w-4" />
-          </div>
-        </Card>
-
-        {/* AUTOMATIZACIONES */}
-        <Card className="md:col-span-3">
-          <p className="label-os">automatizaciones</p>
-          <ul className="mt-4 space-y-2 text-sm">
-            {["Downloads Organizer", "Telegram → Cerebro", "Backup nocturno"].map((a, i) => (
-              <li key={a} className="flex items-center gap-2">
-                <Zap className={`h-3.5 w-3.5 ${i === 2 ? "text-muted-foreground" : "text-signal"}`} />
-                <span className="flex-1 truncate">{a}</span>
-                <span className="label-os">{i === 2 ? "03:00" : "activa"}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
+    <Panel className="col-span-12 flex items-center gap-6 lg:col-span-5 lg:row-span-2 lg:flex-col lg:items-start lg:justify-between">
+      <button onClick={toggleDonna} aria-label="Hablar con Donna" className="shrink-0">
+        <span className="block h-24 w-24 rounded-full bg-orb animate-orb lg:h-32 lg:w-32" />
+      </button>
+      <div>
+        <p className="label-os">donna</p>
+        <h1 className="mt-2 text-3xl font-semibold leading-tight lg:text-4xl">{greet}, Bismarck.</h1>
+        <p className="mt-3 max-w-sm leading-relaxed text-muted-foreground">
+          Hoy toca una cosa: <span className="text-foreground">{s.task.title}</span>. Tienes {s.inbox.length} ideas esperando en el Inbox; no se van a ir.
+        </p>
+        <button onClick={toggleDonna} className="mt-5 min-h-11 rounded-full border px-5 text-sm hover:bg-accent">Hablar con Donna</button>
       </div>
+    </Panel>
+  );
+}
 
-      {/* APP DOCK */}
-      <nav className="fixed inset-x-0 bottom-6 z-30 mx-auto w-fit max-w-[calc(100vw-10rem)] overflow-x-auto rounded-3xl glass bg-glass-strong p-2">
-        <ul className="flex gap-2">
-          {apps.map(({ name, icon: Icon, tone }) => (
-            <li key={name}>
-              <button title={name} className="group flex flex-col items-center gap-1 px-1">
-                <span className={`grid h-11 w-11 place-items-center rounded-2xl ${tone} transition group-hover:-translate-y-1`}>
-                  <Icon className="h-5 w-5" />
-                </span>
-                <span className="hidden text-[10px] text-muted-foreground lg:block">{name}</span>
+function Foco() {
+  const s = useCerebro();
+  return (
+    <Panel className="col-span-12 lg:col-span-7">
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-primary" />
+        <p className="label-os">foco ahora · {s.task.area}</p>
+      </div>
+      <h2 className="mt-3 text-3xl font-semibold leading-tight">{s.task.title}</h2>
+      <p className="mt-2 text-muted-foreground">Siguiente paso: <span className="text-foreground">{s.task.next}</span></p>
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <Link to="/focus" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-7 font-semibold text-primary-foreground glow-primary">
+          <Play className="h-4 w-4 fill-current" /> Empezar
+        </Link>
+        <div className="flex rounded-full border p-1">
+          {[25, 50].map((m) => (
+            <button key={m} onClick={() => setState((x) => ({ ...x, duration: m }))}
+              className={`min-h-10 rounded-full px-4 font-mono text-xs ${s.duration === m ? "bg-accent text-foreground" : "text-muted-foreground"}`}>
+              {m} min
+            </button>
+          ))}
+        </div>
+        <span className="ml-auto font-mono text-xs text-muted-foreground">{s.pomodoros} pomodoros hoy</span>
+      </div>
+    </Panel>
+  );
+}
+
+function HoyList() {
+  return (
+    <Panel className="col-span-12 md:col-span-7 lg:col-span-4">
+      <div className="flex items-center justify-between"><p className="label-os">hoy</p><Demo /></div>
+      <ul className="mt-3 space-y-2.5">
+        {demoEvents.map((e) => (
+          <li key={e.title} className="flex gap-3 text-sm">
+            <span className="w-11 shrink-0 font-mono text-muted-foreground">{e.time}</span>
+            <span>{e.title}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="my-4 h-px bg-border" />
+      <p className="label-os">3 en foco</p>
+      <ol className="mt-2 space-y-2">
+        {demoFocusTasks.map((t, i) => (
+          <li key={t.title} className="flex gap-3 text-sm">
+            <span className={`font-mono ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>0{i + 1}</span>
+            <span className="flex-1">{t.title}</span>
+          </li>
+        ))}
+      </ol>
+    </Panel>
+  );
+}
+
+function Clima() {
+  const { place, setPlace } = usePlace();
+  const [editing, setEditing] = useState(false);
+  const [q, setQ] = useState("");
+  const [err, setErr] = useState("");
+  const { data, isError, isLoading } = useQuery({
+    queryKey: ["weather", place.lat, place.lon],
+    queryFn: () => fetchWeather(place),
+    staleTime: 15 * 60_000,
+  });
+  return (
+    <Panel className="col-span-12 md:col-span-5 lg:col-span-3">
+      <div className="flex items-center justify-between">
+        <p className="label-os">clima</p>
+        <button onClick={() => setEditing((e) => !e)} className="flex min-h-9 items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+          <MapPin className="h-3.5 w-3.5" /> {place.name}
+        </button>
+      </div>
+      {editing ? (
+        <form className="mt-3" onSubmit={async (e) => {
+          e.preventDefault(); setErr("");
+          const p = await geocodeCity(q).catch(() => null);
+          if (p) { setPlace(p); setEditing(false); setQ(""); } else setErr("No encontré esa ciudad.");
+        }}>
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ciudad…" className="h-11 w-full rounded-xl border bg-transparent px-3 text-sm outline-none" />
+          {err && <p className="mt-2 text-xs text-destructive">{err}</p>}
+        </form>
+      ) : isLoading ? (
+        <p className="mt-4 text-sm text-muted-foreground">Consultando…</p>
+      ) : isError || !data ? (
+        <p className="mt-4 text-sm text-muted-foreground">Sin conexión con el servicio del clima.</p>
+      ) : (
+        <>
+          <p className="mt-3 font-mono text-5xl font-medium">{data.temp}°</p>
+          <p className="mt-1 text-sm">{describe(data.code)}</p>
+          <p className="mt-1 font-mono text-xs text-muted-foreground">máx {data.max}° · mín {data.min}°</p>
+        </>
+      )}
+    </Panel>
+  );
+}
+
+function Ring({ value }: { value: number | null }) {
+  const R = 22, C = 2 * Math.PI * R;
+  return (
+    <svg viewBox="0 0 56 56" className="h-14 w-14 -rotate-90">
+      <circle cx="28" cy="28" r={R} fill="none" stroke="var(--border)" strokeWidth="5" />
+      {value !== null && <circle cx="28" cy="28" r={R} fill="none" stroke="var(--primary)" strokeWidth="5" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - value)} />}
+    </svg>
+  );
+}
+
+function Progreso() {
+  return (
+    <Panel className="col-span-12 lg:col-span-6">
+      <div className="flex items-center justify-between"><p className="label-os">largo plazo</p><Demo /></div>
+      <div className="mt-4 grid grid-cols-3 gap-4">
+        {demoGoals.map((g) => (
+          <div key={g.name} className="flex items-center gap-3">
+            <Ring value={g.progress} />
+            <div className="min-w-0">
+              <p className="truncate font-medium">{g.name}</p>
+              <p className={`text-xs ${g.progress === null ? "text-sand" : "text-muted-foreground"}`}>
+                {g.progress === null ? g.note : `${Math.round(g.progress * 100)}% · ${g.note}`}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+const icon = { ok: Check, warn: AlertTriangle, fail: X };
+const tone = { ok: "text-success", warn: "text-warning", fail: "text-destructive" };
+
+function Recibos() {
+  return (
+    <Panel className="col-span-12 lg:col-span-6">
+      <div className="flex items-center justify-between"><p className="label-os">donna hizo hoy</p><Demo /></div>
+      <ul className="mt-3 space-y-2">
+        {demoReceipts.map((r) => {
+          const I = icon[r.status];
+          return (
+            <li key={r.text} className="flex items-center gap-3 text-sm">
+              <I className={`h-4 w-4 shrink-0 ${tone[r.status]}`} />
+              <span className="flex-1">{r.text}</span>
+              <span className="font-mono text-xs text-muted-foreground">{r.at}</span>
+              <button disabled title="Disponible con datos reales" className="flex min-h-9 items-center gap-1 rounded-full border px-3 text-xs text-muted-foreground opacity-50">
+                <Undo2 className="h-3.5 w-3.5" /> Deshacer
               </button>
             </li>
-          ))}
-        </ul>
-      </nav>
+          );
+        })}
+      </ul>
+    </Panel>
+  );
+}
 
-      <Donna />
+function Hoy() {
+  return (
+    <main className="mx-auto grid max-w-[1180px] grid-cols-12 gap-4 px-6 pt-6">
+      <DonnaHero />
+      <Foco />
+      <HoyList />
+      <Clima />
+      <Progreso />
+      <Recibos />
     </main>
   );
 }
