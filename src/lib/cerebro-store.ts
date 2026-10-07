@@ -18,7 +18,7 @@ const initial: State = {
   ],
   task: {
     area: "Música",
-    icon: "🎵",
+    icon: "",
     title: "Terminar mezcla de “Chicas malas”",
     next: "Revisar voces principales",
   },
@@ -60,8 +60,14 @@ export function useCerebro() {
   );
 }
 
-export function captureIdea(text: string) {
+export function captureIdea(text: string): string | undefined {
   const t = text.trim();
   if (!t) return;
-  setState((s) => ({ ...s, inbox: [{ id: crypto.randomUUID(), text: t, at: Date.now() }, ...s.inbox] }));
+  const id = crypto.randomUUID();
+  setState((s) => ({ ...s, inbox: [{ id, text: t, at: Date.now() }, ...s.inbox] }));
+  return id;
+}
+
+export function removeIdea(id: string) {
+  setState((s) => ({ ...s, inbox: s.inbox.filter((i) => i.id !== id) }));
 }
