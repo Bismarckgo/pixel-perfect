@@ -110,7 +110,7 @@ function Focus() {
       )}
       {saved && <p className="mt-4 text-sm text-success animate-in fade-in">Guardada en el Inbox. Sigue.</p>}
 
-      <Link to="/" className="label-os mt-12 hover:text-foreground">← volver a home</Link>
+      <Link to="/" className="label-os mt-12 hover:text-foreground">← volver a hoy</Link>
     </main>
   );
 }
