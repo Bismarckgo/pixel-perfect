@@ -4,7 +4,7 @@ import { captureIdea, removeIdea, useCerebro } from "@/lib/cerebro-store";
 
 const suggestions = ["¿Qué tengo pendiente?", "Guarda esta idea: portada con fotos analógicas", "Ayúdame a definir hitos de CST"];
 
-type Msg = { from: "me" | "donna"; text: string; undoId?: string; undone?: boolean };
+type Msg = { from: "me" | "donna"; text: string; undoId?: string | undefined; undone?: boolean };
 
 const listeners = new Set<() => void>();
 export function toggleDonna() { listeners.forEach((l) => l()); }
@@ -40,7 +40,7 @@ export function Donna() {
 
   function undo(i: number) {
     const m = msgs[i];
-    if (!m.undoId) return;
+    if (!m?.undoId) return;
     removeIdea(m.undoId);
     setMsgs((all) => all.map((x, j) => (j === i ? { ...x, undone: true } : x)));
   }
