@@ -30,3 +30,15 @@ export const demoGoals: Goal[] = [
   { name: "CST", progress: null, note: "Define los hitos" },
   { name: "W Agency Ads", progress: null, note: "Define los hitos" },
 ];
+
+export type BoardColumn = "todo" | "doing" | "waiting" | "done";
+export type BoardTask = { id: string; title: string; area: string; col: BoardColumn; note?: string };
+
+export const demoBoard: BoardTask[] = [
+  { id: "d1", title: "Terminar mezcla de “Chicas malas”", area: "Música", col: "doing" },
+  { id: "d2", title: "Definir hitos de CST", area: "CST", col: "todo" },
+  { id: "d3", title: "Bocetar 3 posts de W Agency Ads", area: "W Agency Ads", col: "todo" },
+  { id: "d4", title: "Investigar YOLO", area: "Cerebro", col: "todo" },
+  { id: "d5", title: "Respuesta del estudio", area: "Música", col: "waiting", note: "fecha por confirmar" },
+  { id: "d6", title: "Nueva barra de navegación", area: "Cerebro", col: "done" },
+];
