@@ -34,6 +34,44 @@ export const demoGoals: Goal[] = [
 export type BoardColumn = "todo" | "doing" | "waiting" | "done";
 export type BoardTask = { id: string; title: string; area: string; col: BoardColumn; note?: string };
 
+export type Milestone = { title: string; done: boolean; date?: string };
+export type Area = {
+  id: string;
+  name: string;
+  focus: string;
+  rhythm: string;
+  milestones: Milestone[] | null; // null = hitos sin definir
+  paused?: boolean;
+};
+
+export const demoAreas: Area[] = [
+  {
+    id: "musica",
+    name: "Música",
+    focus: "Terminar mezcla de “Chicas malas”",
+    rhythm: "3 sesiones por semana",
+    milestones: [
+      { title: "Mezcla de “Chicas malas”", done: false, date: "esta semana" },
+      { title: "Master y portada", done: false, date: "por confirmar" },
+      { title: "Lanzamiento del single", done: false, date: "por confirmar" },
+    ],
+  },
+  {
+    id: "cerebro",
+    name: "Cerebro",
+    focus: "Rediseño de la interfaz",
+    rhythm: "iteración diaria",
+    milestones: [
+      { title: "Sistema de diseño y navegación", done: true },
+      { title: "Hoy, Tareas y Calendario", done: true },
+      { title: "Áreas, Biblioteca, Casa y Sistema", done: false, date: "en curso" },
+    ],
+  },
+  { id: "cst", name: "CST", focus: "Por definir", rhythm: "sin ritmo definido", milestones: null },
+  { id: "waa", name: "W Agency Ads", focus: "Por definir", rhythm: "sin ritmo definido", milestones: null },
+  { id: "fotografia", name: "Fotografía analógica", focus: "En pausa", rhythm: "—", milestones: null, paused: true },
+];
+
 export const demoBoard: BoardTask[] = [
   { id: "d1", title: "Terminar mezcla de “Chicas malas”", area: "Música", col: "doing" },
   { id: "d2", title: "Definir hitos de CST", area: "CST", col: "todo" },
