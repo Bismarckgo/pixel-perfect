@@ -24,7 +24,8 @@ const Demo = () => (
 
 function AreaCard({ area }: { area: Area }) {
   const [open, setOpen] = useState(false);
-  const undefinedMilestones = area.milestones === null;
+  const milestones = area.milestones;
+  const undefinedMilestones = milestones === null;
 
   return (
     <section className="rounded-3xl surface p-5">
