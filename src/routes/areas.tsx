@@ -60,7 +60,7 @@ function AreaCard({ area }: { area: Area }) {
             </div>
           ) : (
             <ul className="mt-3 space-y-2.5">
-              {area.milestones.map((m) => (
+              {milestones.map((m) => (
                 <li key={m.title} className="flex items-center gap-3 text-sm">
                   {m.done ? (
                     <Check className="h-4 w-4 shrink-0 text-success" />
