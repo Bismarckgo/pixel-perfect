@@ -8,7 +8,7 @@ Orden de entrega (brief §15): mostrar cada paso al usuario antes del siguiente.
 - [x] c. Pantalla Hoy con Donna al centro y widget de clima (Open-Meteo, ubicación configurable)
 - [x] d. Tareas: Kanban (Por hacer / Haciendo / Esperando / Hecho) con filtro por área
 - [x] e. Calendario: mes con números grandes + agenda del día, se llena con lo que Donna captura
-- [ ] f. Áreas: proyectos reales de Bismarck con hitos, ritmo semanal y estante de "en pausa"
+- [x] f. Áreas: proyectos reales de Bismarck con hitos, ritmo semanal y estante de "en pausa"
 - [ ] g. Biblioteca: Inbox + Ideas + Conocimiento + Archivos con filtros
 - [ ] h. Casa: Apple TV 4K y PC Lenovo — "No conectado" hasta tener integraciones
 - [ ] i. Sistema: estado real del servidor, accesos Tailscale/Debian, registro de Donna, ajustes
