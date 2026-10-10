@@ -72,6 +72,25 @@ export const demoAreas: Area[] = [
   { id: "fotografia", name: "Fotografía analógica", focus: "En pausa", rhythm: "—", milestones: null, paused: true },
 ];
 
+export type LibraryIdea = { id: string; text: string; area: string; at: string };
+export const demoIdeas: LibraryIdea[] = [
+  { id: "i1", text: "Portada del single con foto analógica escaneada", area: "Música", at: "hace 2 días" },
+  { id: "i2", text: "Serie de posts: “detrás del anuncio”", area: "W Agency Ads", at: "hace 3 días" },
+  { id: "i3", text: "Widget de foco que cambia con la hora del día", area: "Cerebro", at: "hace 5 días" },
+];
+
+export type KnowledgeItem = { id: string; title: string; source: string; area: string };
+export const demoKnowledge: KnowledgeItem[] = [
+  { id: "k1", title: "Notas sobre compresión paralela", source: "apunte propio", area: "Música" },
+  { id: "k2", title: "Checklist de campaña Meta Ads", source: "apunte propio", area: "W Agency Ads" },
+];
+
+export type FileItem = { id: string; name: string; kind: string; area: string };
+export const demoFiles: FileItem[] = [
+  { id: "f1", name: "chicas-malas_v3.wav", kind: "audio", area: "Música" },
+  { id: "f2", name: "brief-rediseno.pdf", kind: "documento", area: "Cerebro" },
+];
+
 export const demoBoard: BoardTask[] = [
   { id: "d1", title: "Terminar mezcla de “Chicas malas”", area: "Música", col: "doing" },
   { id: "d2", title: "Definir hitos de CST", area: "CST", col: "todo" },
