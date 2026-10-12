@@ -20,4 +20,3 @@ Orden de entrega (brief §15): mostrar cada paso al usuario antes del siguiente.
 - Cómo están conectadas las pantallas (TV/monitor y cable)
 - Cadencia de posts de W Agency Ads
 - Confirmar límite de proyectos abiertos
-- Subir el proyecto a GitHub: el usuario lo conecta desde el editor (+ → GitHub → Connect project)
