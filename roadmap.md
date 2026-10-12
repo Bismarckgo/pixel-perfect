@@ -10,7 +10,7 @@ Orden de entrega (brief §15): mostrar cada paso al usuario antes del siguiente.
 - [x] e. Calendario: mes con números grandes + agenda del día, se llena con lo que Donna captura
 - [x] f. Áreas: proyectos reales de Bismarck con hitos, ritmo semanal y estante de "en pausa"
 - [x] g. Biblioteca: Inbox + Ideas + Conocimiento + Archivos con filtros
-- [ ] h. Casa: Apple TV 4K y PC Lenovo — "No conectado" hasta tener integraciones
+- [x] h. Casa: Apple TV 4K y PC Lenovo — "No conectado" hasta tener integraciones
 - [ ] i. Sistema: estado real del servidor, accesos Tailscale/Debian, registro de Donna, ajustes
 - [ ] Fondos atmosféricos con las fotos propias de Bismarck (esperando imágenes)
 - [ ] PWA instalable (manifest + service worker) cuando se aloje en su servidor
