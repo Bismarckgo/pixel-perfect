@@ -14,10 +14,10 @@ Orden de entrega (brief §15): mostrar cada paso al usuario antes del siguiente.
 - [ ] i. Sistema: estado real del servidor, accesos Tailscale/Debian, registro de Donna, ajustes
 - [ ] Fondos atmosféricos con las fotos propias de Bismarck (esperando imágenes)
 - [ ] PWA instalable (manifest + service worker) cuando se aloje en su servidor
+- [x] Proyecto en GitHub: Bismarckgo/pixel-perfect (rama main), sincronización automática en ambos sentidos
 
 ## Pendientes del usuario (brief §17.7)
 - Ventana exacta de sueño y horas del tema claro/oscuro (hoy: claro 16:00–22:00 configurable en src/lib/theme.ts)
 - Cómo están conectadas las pantallas (TV/monitor y cable)
 - Cadencia de posts de W Agency Ads
 - Confirmar límite de proyectos abiertos
-- Subir el proyecto a GitHub: el usuario lo conecta desde el editor (+ → GitHub → Connect project)
