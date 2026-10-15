@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/casa")({
   head: () => ({
     meta: [
-      { title: "Casa — Cerebro" },
+      { title: "Ocio — Cerebro" },
       { name: "description", content: "Apple TV 4K y PC Lenovo. Aparecerán como “No conectado” hasta tener integraciones reales." },
-      { property: "og:title", content: "Casa — Cerebro" },
+      { property: "og:title", content: "Ocio — Cerebro" },
       { property: "og:description", content: "Apple TV 4K y PC Lenovo. Aparecerán como “No conectado” hasta tener integraciones reales." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
