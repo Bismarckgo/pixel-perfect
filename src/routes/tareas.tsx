@@ -1,15 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { demoBoard, type BoardColumn, type BoardTask } from "@/lib/demo-data";
+import { useTasks, setTasks, type Col, type Task } from "@/lib/board";
+import { areaStyle } from "@/lib/areas";
 
 export const Route = createFileRoute("/tareas")({
   head: () => ({
     meta: [
       { title: "Tareas — Cerebro" },
-      { name: "description", content: "Tablero Por hacer / Haciendo / Esperando / Hecho, con filtro por área." },
+      { name: "description", content: "Tablero Por hacer / En proceso / Completadas, con filtro por área." },
       { property: "og:title", content: "Tareas — Cerebro" },
-      { property: "og:description", content: "Tablero Por hacer / Haciendo / Esperando / Hecho, con filtro por área." },
+      { property: "og:description", content: "Tablero Por hacer / En proceso / Completadas, con filtro por área." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -17,23 +18,17 @@ export const Route = createFileRoute("/tareas")({
   component: Tareas,
 });
 
-const cols: { id: BoardColumn; label: string }[] = [
+const cols: { id: Col; label: string }[] = [
   { id: "todo", label: "Por hacer" },
-  { id: "doing", label: "Haciendo" },
-  { id: "waiting", label: "Esperando" },
-  { id: "done", label: "Hecho" },
+  { id: "doing", label: "En proceso" },
+  { id: "done", label: "Completadas" },
 ];
-const KEY = "cerebro.board.v1";
 
 function Tareas() {
-  const [tasks, setTasks] = useState<BoardTask[]>(demoBoard);
+  const tasks = useTasks();
   const [area, setArea] = useState("Todas");
   const [draft, setDraft] = useState("");
-
-  useEffect(() => {
-    try { const raw = localStorage.getItem(KEY); if (raw) setTasks(JSON.parse(raw)); } catch {}
-  }, []);
-  function save(next: BoardTask[]) { setTasks(next); localStorage.setItem(KEY, JSON.stringify(next)); }
+  function save(next: Task[]) { setTasks(() => next); }
   function move(id: string, dir: -1 | 1) {
     save(tasks.map((t) => {
       if (t.id !== id) return t;
@@ -67,7 +62,7 @@ function Tareas() {
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-3">
         {cols.map((c, ci) => {
           const list = shown.filter((t) => t.col === c.id);
           return (
@@ -81,7 +76,7 @@ function Tareas() {
                 {list.map((t) => (
                   <li key={t.id} className={`rounded-2xl border bg-card/50 p-3 ${c.id === "done" ? "opacity-60" : ""}`}>
                     <p className={`text-sm leading-snug ${c.id === "done" ? "line-through" : ""}`}>{t.title}</p>
-                    <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{t.area}{t.note ? ` · ${t.note}` : ""}</p>
+                    <p className="mt-1 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground"><span className="h-2 w-2 shrink-0 rounded-full" style={{ background: areaStyle(t.area).color }} />{t.area}{t.note ? ` · ${t.note}` : ""}</p>
                     <div className="mt-2 flex justify-end gap-1">
                       <button disabled={ci === 0} onClick={() => move(t.id, -1)} aria-label="Mover atrás" className="grid h-11 w-11 place-items-center rounded-full border disabled:opacity-30"><ChevronLeft className="h-4 w-4" /></button>
                       <button disabled={ci === cols.length - 1} onClick={() => move(t.id, 1)} aria-label="Mover adelante" className="grid h-11 w-11 place-items-center rounded-full border disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>

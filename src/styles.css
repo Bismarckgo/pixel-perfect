@@ -79,7 +79,14 @@
   --glow-primary: 0 0 36px -10px color-mix(in oklab, var(--primary) 70%, transparent);
   --glow-signal: var(--glow-primary);
   --gradient-brand: linear-gradient(135deg, #c43f00, #e85002 55%, #f07a3a);
-  --gradient-orb: radial-gradient(circle at 32% 30%, #d8ecff, #5aa9ff 42%, #0d2a55 100%);
+  --gradient-orb: radial-gradient(circle at 32% 28%, #ffd2b3, #e85002 45%, #7a2300 100%);
+  --area-musica: #e0a458;
+  --area-cst: #6fa8dc;
+  --area-waa: #8fbf8a;
+  --area-cerebro: #d9c3ab;
+  --area-personal: #e07a6b;
+  --area-sistema: #a7a7a7;
+  --area-foto: #b8a07e;
   --gradient-ambient:
     radial-gradient(55rem 35rem at 0% -10%, rgb(232 80 2 / 10%), transparent 60%),
     radial-gradient(45rem 30rem at 100% 110%, rgb(217 195 171 / 7%), transparent 60%);
@@ -151,8 +158,8 @@ html.light {
 }
 
 @keyframes orb-breathe {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 40px -10px var(--ai); }
-  50% { transform: scale(1.04); box-shadow: 0 0 60px -6px var(--ai); }
+  0%, 100% { transform: scale(1); box-shadow: 0 0 40px -10px var(--primary); }
+  50% { transform: scale(1.04); box-shadow: 0 0 60px -6px var(--primary); }
 }
 @keyframes orb-listen {
   0%, 100% { transform: scale(1.06); box-shadow: 0 0 0 0 color-mix(in oklab, var(--ai) 50%, transparent); }
