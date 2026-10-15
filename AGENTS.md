@@ -10,3 +10,5 @@
 <!-- LOVABLE:END -->
 
 - Keep Casa presentation-only until real device integrations exist; disconnected device controls remain disabled so the UI never reports simulated actions.
+- Keep home-screen installation manifest-only, with metadata in the root head and icons in public; app-shell caching is excluded until offline use is explicitly requested to avoid stale previews.
+- Keep Hoy's primary view limited to Donna, current focus, day agenda and weather; other sections retain their own routes so simplifying Home does not duplicate data or alter verified screens.

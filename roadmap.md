@@ -16,7 +16,6 @@ Orden de entrega (brief §15): mostrar cada paso al usuario antes del siguiente.
 - [ ] PWA instalable (manifest + service worker) cuando se aloje en su servidor
 - [x] Proyecto en GitHub: Bismarckgo/pixel-perfect (rama main), sincronización automática en ambos sentidos
 
-## Pendientes del usuario (brief §17.7)
 ## Ajuste actual — Hoy y tablet
 - [ ] Simplificar Hoy sin cambiar el estilo ni las otras pantallas.
 - [ ] Añadir instalación para tablet/iPad (sin modo offline).
