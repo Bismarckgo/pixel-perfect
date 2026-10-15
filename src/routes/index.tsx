@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Play, Check, AlertTriangle, X, Undo2, MapPin } from "lucide-react";
+import { Play, MapPin, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useCerebro, setState } from "@/lib/cerebro-store";
 import { toggleDonna } from "@/components/cerebro/Donna";
-import { demoEvents, demoFocusTasks, demoGoals, demoReceipts } from "@/lib/demo-data";
+import { demoEvents } from "@/lib/demo-data";
 import { describe, fetchWeather, geocodeCity, usePlace } from "@/lib/weather";
 
 export const Route = createFileRoute("/")({
@@ -21,12 +22,6 @@ export const Route = createFileRoute("/")({
   component: Hoy,
 });
 
-const Demo = () => <span className="rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">demo</span>;
-
-function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`rounded-3xl surface p-5 ${className}`}>{children}</section>;
-}
-
 function useGreeting() {
   const [g, setG] = useState("Hola");
   useEffect(() => {
@@ -34,80 +29,6 @@ function useGreeting() {
     setG(h >= 16 && h < 19 ? "Buenas tardes" : h >= 19 || h < 5 ? "Buenas noches" : "Buen día");
   }, []);
   return g;
-}
-
-function DonnaHero() {
-  const greet = useGreeting();
-  const s = useCerebro();
-  return (
-    <Panel className="col-span-12 flex items-center gap-6 lg:col-span-5 lg:row-span-2 lg:flex-col lg:items-start lg:justify-between">
-      <button onClick={toggleDonna} aria-label="Hablar con Donna" className="shrink-0">
-        <span className="block h-24 w-24 rounded-full bg-orb animate-orb lg:h-32 lg:w-32" />
-      </button>
-      <div>
-        <p className="label-os">donna</p>
-        <h1 className="mt-2 text-3xl font-semibold leading-tight lg:text-4xl">{greet}, Bismarck.</h1>
-        <p className="mt-3 max-w-sm leading-relaxed text-muted-foreground">
-          Hoy toca una cosa: <span className="text-foreground">{s.task.title}</span>. Tienes {s.inbox.length} ideas esperando en el Inbox; no se van a ir.
-        </p>
-        <button onClick={toggleDonna} className="mt-5 min-h-11 rounded-full border px-5 text-sm hover:bg-accent">Hablar con Donna</button>
-      </div>
-    </Panel>
-  );
-}
-
-function Foco() {
-  const s = useCerebro();
-  return (
-    <Panel className="col-span-12 lg:col-span-7">
-      <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-primary" />
-        <p className="label-os">foco ahora · {s.task.area}</p>
-      </div>
-      <h2 className="mt-3 text-3xl font-semibold leading-tight">{s.task.title}</h2>
-      <p className="mt-2 text-muted-foreground">Siguiente paso: <span className="text-foreground">{s.task.next}</span></p>
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <Link to="/focus" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-7 font-semibold text-primary-foreground glow-primary">
-          <Play className="h-4 w-4 fill-current" /> Empezar
-        </Link>
-        <div className="flex rounded-full border p-1">
-          {[25, 50].map((m) => (
-            <button key={m} onClick={() => setState((x) => ({ ...x, duration: m }))}
-              className={`min-h-10 rounded-full px-4 font-mono text-xs ${s.duration === m ? "bg-accent text-foreground" : "text-muted-foreground"}`}>
-              {m} min
-            </button>
-          ))}
-        </div>
-        <span className="ml-auto font-mono text-xs text-muted-foreground">{s.pomodoros} pomodoros hoy</span>
-      </div>
-    </Panel>
-  );
-}
-
-function HoyList() {
-  return (
-    <Panel className="col-span-12 md:col-span-7 lg:col-span-4">
-      <div className="flex items-center justify-between"><p className="label-os">hoy</p><Demo /></div>
-      <ul className="mt-3 space-y-2.5">
-        {demoEvents.map((e) => (
-          <li key={e.title} className="flex gap-3 text-sm">
-            <span className="w-11 shrink-0 font-mono text-muted-foreground">{e.time}</span>
-            <span>{e.title}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="my-4 h-px bg-border" />
-      <p className="label-os">3 en foco</p>
-      <ol className="mt-2 space-y-2">
-        {demoFocusTasks.map((t, i) => (
-          <li key={t.title} className="flex gap-3 text-sm">
-            <span className={`font-mono ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>0{i + 1}</span>
-            <span className="flex-1">{t.title}</span>
-          </li>
-        ))}
-      </ol>
-    </Panel>
-  );
 }
 
 function Clima() {
@@ -121,12 +42,12 @@ function Clima() {
     staleTime: 15 * 60_000,
   });
   return (
-    <Panel className="col-span-12 md:col-span-5 lg:col-span-3">
+    <section className="border-l pl-6">
       <div className="flex items-center justify-between">
         <p className="label-os">clima</p>
-        <button onClick={() => setEditing((e) => !e)} className="flex min-h-9 items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" onClick={() => setEditing((e) => !e)} className="min-h-11 px-2 text-xs text-muted-foreground">
           <MapPin className="h-3.5 w-3.5" /> {place.name}
-        </button>
+        </Button>
       </div>
       {editing ? (
         <form className="mt-3" onSubmit={async (e) => {
@@ -143,81 +64,53 @@ function Clima() {
         <p className="mt-4 text-sm text-muted-foreground">Sin conexión con el servicio del clima.</p>
       ) : (
         <>
-          <p className="mt-3 font-mono text-5xl font-medium">{data.temp}°</p>
+          <p className="mt-3 font-mono text-3xl font-medium">{data.temp}°</p>
           <p className="mt-1 text-sm">{describe(data.code)}</p>
           <p className="mt-1 font-mono text-xs text-muted-foreground">máx {data.max}° · mín {data.min}°</p>
         </>
       )}
-    </Panel>
+    </section>
   );
 }
 
-function Ring({ value }: { value: number | null }) {
-  const R = 22, C = 2 * Math.PI * R;
-  return (
-    <svg viewBox="0 0 56 56" className="h-14 w-14 -rotate-90">
-      <circle cx="28" cy="28" r={R} fill="none" stroke="var(--border)" strokeWidth="5" />
-      {value !== null && <circle cx="28" cy="28" r={R} fill="none" stroke="var(--primary)" strokeWidth="5" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - value)} />}
-    </svg>
-  );
-}
-
-function Progreso() {
-  return (
-    <Panel className="col-span-12 lg:col-span-6">
-      <div className="flex items-center justify-between"><p className="label-os">largo plazo</p><Demo /></div>
-      <div className="mt-4 grid grid-cols-3 gap-4">
-        {demoGoals.map((g) => (
-          <div key={g.name} className="flex items-center gap-3">
-            <Ring value={g.progress} />
-            <div className="min-w-0">
-              <p className="truncate font-medium">{g.name}</p>
-              <p className={`text-xs ${g.progress === null ? "text-sand" : "text-muted-foreground"}`}>
-                {g.progress === null ? g.note : `${Math.round(g.progress * 100)}% · ${g.note}`}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </Panel>
-  );
-}
-
-const icon = { ok: Check, warn: AlertTriangle, fail: X };
-const tone = { ok: "text-success", warn: "text-warning", fail: "text-destructive" };
-
-function Recibos() {
-  return (
-    <Panel className="col-span-12 lg:col-span-6">
-      <div className="flex items-center justify-between"><p className="label-os">donna hizo hoy</p><Demo /></div>
-      <ul className="mt-3 space-y-2">
-        {demoReceipts.map((r) => {
-          const I = icon[r.status];
-          return (
-            <li key={r.text} className="flex items-center gap-3 text-sm">
-              <I className={`h-4 w-4 shrink-0 ${tone[r.status]}`} />
-              <span className="flex-1">{r.text}</span>
-              <span className="font-mono text-xs text-muted-foreground">{r.at}</span>
-              <button disabled title="Disponible con datos reales" className="flex min-h-9 items-center gap-1 rounded-full border px-3 text-xs text-muted-foreground opacity-50">
-                <Undo2 className="h-3.5 w-3.5" /> Deshacer
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </Panel>
-  );
-}
 
 function Hoy() {
+  const s = useCerebro();
+  const greet = useGreeting();
   return (
-    <main className="mx-auto grid max-w-[1180px] grid-cols-12 gap-4 px-6 pt-6">
-      <DonnaHero />
-      <Foco />
-      <HoyList />
-      <Clima />
-      <Progreso />
-      <Recibos />
+    <main className="mx-auto max-w-[1133px] px-8 pt-8">
+      <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-12">
+        <section className="flex min-h-[300px] flex-col items-center justify-center text-center">
+          <Button variant="ghost" onClick={toggleDonna} aria-label="Hablar con Donna" className="mb-7 h-32 w-32 rounded-full p-0 hover:bg-transparent">
+            <span className="block h-28 w-28 rounded-full bg-orb animate-orb" />
+          </Button>
+          <p className="label-os">donna</p>
+          <h1 className="mt-2 text-3xl font-semibold leading-tight">{greet}, Bismarck.</h1>
+          <Button variant="ghost" onClick={toggleDonna} className="mt-3 min-h-11 text-muted-foreground">Hablemos <ArrowUpRight /></Button>
+        </section>
+        <section className="rounded-3xl surface p-7" aria-label="Foco actual">
+          <div className="flex items-center justify-between gap-3">
+            <p className="label-os">foco ahora · {s.task.area}</p>
+            <span className="label-os">Demo</span>
+          </div>
+          <h2 className="mt-5 text-3xl font-semibold leading-tight">{s.task.title}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.task.next}</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <Button asChild className="min-h-12 rounded-full px-6"><Link to="/focus"><Play className="fill-current" /> Empezar</Link></Button>
+            <div className="flex rounded-full border p-1" role="group" aria-label="Duración del foco">
+              {[25, 50].map((m) => <Button key={m} variant="ghost" aria-pressed={s.duration === m} onClick={() => setState((x) => ({ ...x, duration: m }))} className={`h-11 rounded-full px-4 font-mono text-xs ${s.duration === m ? "bg-accent text-foreground" : "text-muted-foreground"}`}>{m} min</Button>)}
+            </div>
+          </div>
+          <p className="mt-4 font-mono text-xs text-muted-foreground">{s.pomodoros} pomodoros hoy</p>
+        </section>
+      </div>
+      <div className="mt-8 grid grid-cols-[minmax(0,1fr)_minmax(180px,0.45fr)] gap-6 border-t py-5">
+        <section>
+          <div className="flex items-center justify-between gap-3"><p className="label-os">tu día · demo</p><Button asChild variant="ghost" className="min-h-11 text-xs text-muted-foreground"><Link to="/calendario">Calendario <ArrowUpRight /></Link></Button></div>
+          <ul className="mt-2 space-y-3">{demoEvents.map((e) => <li key={e.title} className="flex gap-4 text-sm"><span className="shrink-0 font-mono text-muted-foreground">{e.time}</span><span>{e.title}</span></li>)}</ul>
+        </section>
+        <Clima />
+      </div>
     </main>
   );
 }
