@@ -13,12 +13,12 @@ Orden de entrega (brief §15): mostrar cada paso al usuario antes del siguiente.
 - [x] h. Casa: Apple TV 4K y PC Lenovo — "No conectado" hasta tener integraciones
 - [ ] i. Sistema: estado real del servidor, accesos Tailscale/Debian, registro de Donna, ajustes
 - [ ] Fondos atmosféricos con las fotos propias de Bismarck (esperando imágenes)
-- [ ] PWA instalable (manifest + service worker) cuando se aloje en su servidor
+- [x] Preparación PWA instalable para tablet/iPad (manifest e iconos, sin modo offline); instalación física pendiente de servir por HTTPS en su servidor.
 - [x] Proyecto en GitHub: Bismarckgo/pixel-perfect (rama main), sincronización automática en ambos sentidos
 
 ## Ajuste actual — Hoy y tablet
-- [ ] Simplificar Hoy sin cambiar el estilo ni las otras pantallas.
-- [ ] Añadir instalación para tablet/iPad (sin modo offline).
+- [x] Simplificar Hoy sin cambiar el estilo ni las otras pantallas.
+- [x] Añadir instalación para tablet/iPad (sin modo offline); manifest e iconos verificados, instalación real pendiente de alojamiento HTTPS.
 - [x] Fijar el estilo actual como regla permanente y explicar cómo volver a una versión anterior.
 
 ## Pendientes del usuario (brief §17.7)
