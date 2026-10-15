@@ -17,6 +17,12 @@ Orden de entrega (brief §15): mostrar cada paso al usuario antes del siguiente.
 - [x] Proyecto en GitHub: Bismarckgo/pixel-perfect (rama main), sincronización automática en ambos sentidos
 
 ## Pendientes del usuario (brief §17.7)
+## Ajuste actual — Hoy y tablet
+- [ ] Simplificar Hoy sin cambiar el estilo ni las otras pantallas.
+- [ ] Añadir instalación para tablet/iPad (sin modo offline).
+- [x] Fijar el estilo actual como regla permanente y explicar cómo volver a una versión anterior.
+
+## Pendientes del usuario (brief §17.7)
 - Ventana exacta de sueño y horas del tema claro/oscuro (hoy: claro 16:00–22:00 configurable en src/lib/theme.ts)
 - Cómo están conectadas las pantallas (TV/monitor y cable)
 - Cadencia de posts de W Agency Ads
