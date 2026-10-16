@@ -3,7 +3,7 @@ import { demoBoard, type BoardTask } from "@/lib/demo-data";
 
 /** Fuente única de tareas: Hoy y el Kanban leen y escriben aquí. */
 export type Col = "todo" | "doing" | "done";
-export type Task = Omit<BoardTask, "col"> & { col: Col; prev?: Col };
+export type Task = Omit<BoardTask, "col"> & { col: Col; prev?: Col | undefined };
 
 const KEY = "cerebro.board.v1";
 const normalize = (list: BoardTask[]): Task[] =>
