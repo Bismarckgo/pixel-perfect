@@ -168,7 +168,7 @@ function Hoy() {
     <main className="mx-auto max-w-[1180px] px-6 pt-2 md:px-8">
       <section className="-mt-14 max-w-[60%]">
         <h1 className="text-4xl font-semibold leading-tight md:text-5xl">{m.greet}, Bismarck.</h1>
-        <p className="mt-1 text-lg capitalize text-muted-foreground">{m.date}</p>
+        <p className="mt-1 text-lg text-muted-foreground">{m.date.charAt(0).toUpperCase() + m.date.slice(1)}</p>
         <Clima />
       </section>
       <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)]">
