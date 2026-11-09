@@ -26,3 +26,9 @@ Orden de entrega (brief §15): mostrar cada paso al usuario antes del siguiente.
 - Cómo están conectadas las pantallas (TV/monitor y cable)
 - Cadencia de posts de W Agency Ads
 - Confirmar límite de proyectos abiertos
+
+## Panel Android — documento del 9 de noviembre
+- [ ] Revisar y aprobar el alcance, los supuestos y las contradicciones con las reglas vigentes.
+- [ ] Adaptar Hoy, Calendario, Tareas y Ocio al panel táctil descrito.
+- [ ] Recuperar Pomodoro completo, persistente y verificable; simplificar la entrada de Donna.
+- [ ] Preparar instalación y carcasa sin conexión, medir compatibilidad/rendimiento y documentar límites reales.
