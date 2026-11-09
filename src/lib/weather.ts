@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export type Place = { name: string; lat: number; lon: number };
-export type Weather = { temp: number; code: number; max: number; min: number; isDay: boolean };
+export type Weather = { temp: number; feels: number; code: number; max: number; min: number; isDay: boolean };
 
 const LOC_KEY = "cerebro.location.v1";
 const DEFAULT_PLACE: Place = { name: "Ciudad de Panamá", lat: 8.9824, lon: -79.5199 };
@@ -18,12 +18,13 @@ export function describe(code: number): string {
 }
 
 export async function fetchWeather(p: Place): Promise<Weather> {
-  const u = `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}&current=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1`;
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}&current=temperature_2m,apparent_temperature,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1`;
   const r = await fetch(u);
   if (!r.ok) throw new Error("clima no disponible");
   const j = await r.json();
   return {
     temp: Math.round(j.current.temperature_2m),
+    feels: Math.round(j.current.apparent_temperature),
     code: j.current.weather_code,
     isDay: j.current.is_day === 1,
     max: Math.round(j.daily.temperature_2m_max[0]),

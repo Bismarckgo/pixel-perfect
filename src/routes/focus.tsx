@@ -1,8 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Pause, Play, Square, Plus, Check } from "lucide-react";
-import { useCerebro, captureIdea, setState } from "@/lib/cerebro-store";
-
+import { Pause, Play, Square, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { areaStyle } from "@/lib/areas";
+import { useTimer, tickTimer, pauseTimer, resumeTimer, cancelTimer, startTimer } from "@/lib/timer-store";
+import { remaining } from "@/lib/pomodoro";
+import { prepareSessionDisplay, exitSessionDisplay, sessionFeedback } from "@/lib/device-apis";
 export const Route = createFileRoute("/focus")({
   head: () => ({
     meta: [
@@ -18,99 +21,18 @@ export const Route = createFileRoute("/focus")({
 });
 
 function Focus() {
-  const s = useCerebro();
-  const navigate = useNavigate();
-  const total = s.duration * 60;
-  const [left, setLeft] = useState(total);
-  const [running, setRunning] = useState(true);
-  const [done, setDone] = useState(false);
-  const [capturing, setCapturing] = useState(false);
-  const [idea, setIdea] = useState("");
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => setLeft(s.duration * 60), [s.duration]);
-
-  useEffect(() => {
-    if (!running || done) return;
-    const t = setInterval(() => setLeft((l) => {
-      if (l <= 1) {
-        setDone(true);
-        setState((x) => ({ ...x, pomodoros: x.pomodoros + 1 }));
-        return 0;
-      }
-      return l - 1;
-    }), 1000);
-    return () => clearInterval(t);
-  }, [running, done]);
-
-  const mm = String(Math.floor(left / 60)).padStart(2, "0");
-  const ss = String(left % 60).padStart(2, "0");
-  const R = 140, C = 2 * Math.PI * R;
-  const progress = 1 - left / total;
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12 text-center">
-      <p className="label-os">focus mode · {s.task.area}</p>
-      <h1 className="mt-4 max-w-2xl text-3xl font-semibold md:text-5xl">{s.task.title}</h1>
-      <p className="mt-3 text-muted-foreground">Siguiente: {s.task.next}</p>
-
-      <div className="relative my-12 h-80 w-80">
-        <svg viewBox="0 0 320 320" className="h-full w-full -rotate-90">
-          <circle cx="160" cy="160" r={R} fill="none" stroke="var(--border)" strokeWidth="6" />
-          <circle
-            cx="160" cy="160" r={R} fill="none"
-            stroke={done ? "var(--success)" : "var(--signal)"}
-            strokeWidth="6" strokeLinecap="round"
-            strokeDasharray={C} strokeDashoffset={C * (1 - progress)}
-            style={{ transition: "stroke-dashoffset 1s linear", filter: "drop-shadow(0 0 12px var(--signal))" }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          {done ? (
-            <div className="animate-reward flex flex-col items-center">
-              <span className="grid h-16 w-16 place-items-center rounded-full bg-success text-background"><Check className="h-8 w-8" /></span>
-              <p className="mt-4 font-display text-xl">Sesión completada</p>
-              <p className="label-os mt-1">pomodoro #{s.pomodoros}</p>
-            </div>
-          ) : (
-            <>
-              <p className="font-mono text-7xl font-medium tabular-nums">{mm}:{ss}</p>
-              <p className="label-os mt-2">{running ? "en foco" : "en pausa"}</p>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-3">
-        {!done && (
-          <button onClick={() => setRunning((r) => !r)} className="inline-flex items-center gap-2 rounded-full glass px-6 py-3 font-display">
-            {running ? <><Pause className="h-4 w-4" /> Pausar</> : <><Play className="h-4 w-4" /> Seguir</>}
-          </button>
-        )}
-        <button onClick={() => navigate({ to: "/" })} className="inline-flex items-center gap-2 rounded-full glass px-6 py-3 font-display">
-          <Square className="h-4 w-4" /> Terminar
-        </button>
-        <button onClick={() => setCapturing(true)} className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-display text-primary-foreground glow-primary">
-          <Plus className="h-4 w-4" /> Capturar idea
-        </button>
-      </div>
-
-      {capturing && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault(); captureIdea(idea); setIdea(""); setCapturing(false);
-            setSaved(true); setTimeout(() => setSaved(false), 1800);
-          }}
-          className="mt-6 flex w-full max-w-md items-center gap-2 rounded-2xl glass p-2 animate-in fade-in slide-in-from-bottom-2"
-        >
-          <input autoFocus value={idea} onChange={(e) => setIdea(e.target.value)} onBlur={() => !idea && setCapturing(false)}
-            placeholder="La idea va al Inbox…" className="flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground" />
-          <button className="rounded-xl bg-primary px-4 py-2 text-sm text-primary-foreground">Guardar</button>
-        </form>
-      )}
-      {saved && <p className="mt-4 text-sm text-success animate-in fade-in">Guardada en el Inbox. Sigue.</p>}
-
-      <Link to="/" className="label-os mt-12 hover:text-foreground">← volver a hoy</Link>
-    </main>
-  );
+ const timer = useTimer(); const s = timer.session; const navigate = useNavigate(); const [now, setNow] = useState(0); const [confirm, setConfirm] = useState(false);
+ useEffect(() => { const tick = () => { setNow(Date.now()); tickTimer(); }; tick(); const id = setInterval(tick, 250); document.addEventListener("visibilitychange", tick); return () => { clearInterval(id); document.removeEventListener("visibilitychange", tick); }; }, []);
+ useEffect(() => {
+  if (s?.state !== "running") return;
+  let lock: WakeLockSentinel | undefined; let cancelled = false;
+  const acquire = async () => { if (document.visibilityState !== "visible" || !("wakeLock" in navigator)) return; try { const next = await navigator.wakeLock.request("screen"); if (cancelled) await next.release(); else lock = next; } catch {} };
+  void acquire(); document.addEventListener("visibilitychange", acquire);
+  return () => { cancelled = true; document.removeEventListener("visibilitychange", acquire); void lock?.release().catch(() => {}); };
+ }, [s?.state]);
+ useEffect(() => { if (s?.state === "complete") sessionFeedback(); }, [s?.state]);
+ const exit = () => { exitSessionDisplay(); void navigate({ to: "/" }); };
+ if (!s || s.state === "cancelled") return <main className="pomodoro-screen"><h1 className="text-3xl">Sin sesión activa</h1><Button className="mt-6" onClick={exit}>Volver a Hoy</Button></main>;
+ const ms = now ? remaining(s, now) : s.minutes * 60000; const seconds = Math.ceil(ms / 1000); const pct = 1 - ms / (s.minutes * 60000); const a = areaStyle(s.area);
+ return <main className="pomodoro-screen"><p className="flex max-w-2xl items-center gap-3 text-center text-lg"><a.icon size={24} style={{ color: a.color }} />{s.title}</p><div className="pomodoro-dial"><svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden="true"><circle cx="200" cy="200" r="185" fill="none" stroke="var(--border)" strokeWidth="5" /><circle cx="200" cy="200" r="185" fill="none" stroke="var(--primary)" strokeWidth="5" strokeLinecap="round" strokeDasharray="1162.39" strokeDashoffset={1162.39 * (1 - pct)} /></svg><div className="relative text-center">{s.state === "complete" ? <><Check className="mx-auto mb-4 h-12 w-12 text-primary" /><h1 className="text-3xl font-semibold">Sesión completa</h1></> : <><h1 className="pomodoro-time">{String(Math.floor(seconds / 60)).padStart(2,"0")}:{String(seconds % 60).padStart(2,"0")}</h1><p className="mt-4 text-muted-foreground">{s.state === "paused" ? "En pausa" : "En foco"}</p></>}</div></div><div className="flex flex-wrap justify-center gap-4">{s.state === "complete" ? <><Button onClick={() => { if (startTimer(s.taskId, s.minutes)) prepareSessionDisplay(); }}>Otra sesión</Button><Button variant="outline" onClick={exit}>Volver a Hoy</Button></> : <><Button variant="outline" onClick={s.state === "paused" ? resumeTimer : pauseTimer}>{s.state === "paused" ? <><Play />Continuar</> : <><Pause />Pausar</>}</Button><Button variant="outline" onClick={() => setConfirm(true)}><Square />Terminar</Button></>}</div>{confirm && <div className="sheet-backdrop"><section className="tablet-sheet" role="dialog" aria-modal="true" aria-label="Terminar sesión"><h2 className="text-2xl font-semibold">¿Terminar esta sesión?</h2><div className="mt-6 flex flex-wrap gap-3"><Button variant="outline" onClick={() => setConfirm(false)}>Seguir en foco</Button><Button onClick={() => { cancelTimer(); exit(); }}>Terminar sesión</Button></div></section></div>}</main>;
 }
