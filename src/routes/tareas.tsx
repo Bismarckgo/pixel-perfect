@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useTasks, setTasks, type Col, type Task } from "@/lib/board";
+import { Button } from "@/components/ui/button";
+import { TaskSheet } from "@/components/cerebro/TaskSheet";
 import { areaStyle } from "@/lib/areas";
 
 export const Route = createFileRoute("/tareas")({
@@ -18,76 +20,16 @@ export const Route = createFileRoute("/tareas")({
   component: Tareas,
 });
 
-const cols: { id: Col; label: string }[] = [
-  { id: "todo", label: "Por hacer" },
-  { id: "doing", label: "En proceso" },
-  { id: "done", label: "Completadas" },
-];
-
+const cols: { id: Col; label: string }[] = [{ id: "unassigned", label: "Caja de tareas" }, { id: "todo", label: "Por hacer" }, { id: "doing", label: "En proceso" }, { id: "done", label: "Completadas" }];
 function Tareas() {
-  const tasks = useTasks();
-  const [area, setArea] = useState("Todas");
-  const [draft, setDraft] = useState("");
-  function save(next: Task[]) { setTasks(() => next); }
-  function move(id: string, dir: -1 | 1) {
-    save(tasks.map((t) => {
-      if (t.id !== id) return t;
-      const i = cols.findIndex((c) => c.id === t.col) + dir;
-      return cols[i] ? { ...t, col: cols[i].id } : t;
-    }));
-  }
-
-  const areas = ["Todas", ...Array.from(new Set(tasks.map((t) => t.area)))];
-  const shown = tasks.filter((t) => area === "Todas" || t.area === area);
-  const doing = tasks.filter((t) => t.col === "doing").length;
-
-  return (
-    <main className="mx-auto max-w-[1180px] px-6 pt-6">
-      <div className="flex flex-wrap items-end gap-4">
-        <div>
-          <div className="flex items-center gap-2"><p className="label-os">tareas</p><span className="rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">demo</span></div>
-          <h1 className="mt-1 text-3xl font-semibold">Una cosa a la vez.</h1>
-          {doing > 1 && <p className="mt-1 text-sm text-sand">Tienes {doing} cosas en Haciendo. ¿Seguro?</p>}
-        </div>
-        <form onSubmit={(e) => { e.preventDefault(); const v = draft.trim(); if (!v) return; save([{ id: crypto.randomUUID(), title: v, area: area === "Todas" ? "Inbox" : area, col: "todo" }, ...tasks]); setDraft(""); }}
-          className="ml-auto flex h-11 w-full max-w-xs items-center gap-2 rounded-full border px-4">
-          <Plus className="h-4 w-4 text-muted-foreground" />
-          <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Nueva tarea…" className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
-        </form>
-      </div>
-
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-        {areas.map((a) => (
-          <button key={a} onClick={() => setArea(a)} className={`min-h-11 shrink-0 rounded-full border px-4 text-sm ${area === a ? "bg-accent text-foreground" : "text-muted-foreground"}`}>{a}</button>
-        ))}
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-3">
-        {cols.map((c, ci) => {
-          const list = shown.filter((t) => t.col === c.id);
-          return (
-            <section key={c.id} className={`rounded-3xl p-4 ${c.id === "doing" ? "surface" : "border border-dashed"}`}>
-              <div className="flex items-center justify-between">
-                <p className="label-os">{c.label}</p>
-                <span className="font-mono text-xs text-muted-foreground">{list.length}</span>
-              </div>
-              <ul className="mt-3 space-y-2">
-                {list.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">Vacío</li>}
-                {list.map((t) => (
-                  <li key={t.id} className={`rounded-2xl border bg-card/50 p-3 ${c.id === "done" ? "opacity-60" : ""}`}>
-                    <p className={`text-sm leading-snug ${c.id === "done" ? "line-through" : ""}`}>{t.title}</p>
-                    <p className="mt-1 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground"><span className="h-2 w-2 shrink-0 rounded-full" style={{ background: areaStyle(t.area).color }} />{t.area}{t.note ? ` · ${t.note}` : ""}</p>
-                    <div className="mt-2 flex justify-end gap-1">
-                      <button disabled={ci === 0} onClick={() => move(t.id, -1)} aria-label="Mover atrás" className="grid h-11 w-11 place-items-center rounded-full border disabled:opacity-30"><ChevronLeft className="h-4 w-4" /></button>
-                      <button disabled={ci === cols.length - 1} onClick={() => move(t.id, 1)} aria-label="Mover adelante" className="grid h-11 w-11 place-items-center rounded-full border disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
-      </div>
-    </main>
-  );
+  const tasks = useTasks(); const [area, setArea] = useState("Todas"); const [draft, setDraft] = useState(""); const [newArea, setNewArea] = useState("Personal"); const [due, setDue] = useState(""); const [selected, setSelected] = useState<Task | null>(null);
+  const areas = ["Música", "CST", "W Agency Ads", "Cerebro", "Personal", "Sistema", "Fotografía analógica"];
+  return <main className="tablet-page"><h1 className="text-3xl font-semibold">Tareas</h1>
+    <form className="mt-6 flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); if (!draft.trim()) return; setTasks((all) => [{ id: crypto.randomUUID(), title: draft.trim(), area: newArea, col: "unassigned", due: due || undefined, demo: false }, ...all]); setDraft(""); setDue(""); }}>
+    <label className="min-w-0 flex-1">Nueva tarea<input aria-label="Nueva tarea" className="tablet-input mt-2 w-full" placeholder="Título de la tarea" value={draft} onChange={(e) => setDraft(e.target.value)} required /></label>
+    <label>Área<select aria-label="Área de la tarea" className="tablet-input mt-2 block" value={newArea} onChange={(e) => setNewArea(e.target.value)}>{areas.map((a) => <option key={a}>{a}</option>)}</select></label>
+    <label>Fecha y hora<input aria-label="Fecha y hora" type="datetime-local" className="tablet-input mt-2 block" value={due} onChange={(e) => setDue(e.target.value)} /></label><Button type="submit"><Plus />Crear</Button></form>
+    <div className="mt-6"><select aria-label="Filtrar área" className="tablet-input" value={area} onChange={(e) => setArea(e.target.value)}>{["Todas", ...areas].map((a) => <option key={a}>{a}</option>)}</select></div>
+    <div className="task-board mt-6">{cols.map((c) => <section key={c.id} className={c.id === "unassigned" ? "task-inbox" : ""}><h2 className="label-os">{c.label} · {tasks.filter((t) => t.col === c.id && (area === "Todas" || t.area === area)).length}</h2><ul className="mt-4 space-y-3">{tasks.filter((t) => t.col === c.id && (area === "Todas" || t.area === area)).map((t) => { const a = areaStyle(t.area); return <li key={t.id}><Button variant="ghost" className="task-card" onClick={() => setSelected(t)}><span className={`block whitespace-normal ${t.col === "done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</span><span className="mt-2 flex items-center gap-2 text-[13px] text-muted-foreground"><a.icon size={18} style={{ color: a.color }} />{t.area}{t.demo ? " · Demo" : ""}</span>{t.due && <span className="mt-2 block text-[13px] text-muted-foreground">{t.due.replace("T", " · ")}</span>}</Button></li>; })}</ul></section>)}</div>{selected && <TaskSheet task={selected} close={() => setSelected(null)} />}
+  </main>;
 }

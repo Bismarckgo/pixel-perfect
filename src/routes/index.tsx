@@ -2,7 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Check, MapPin, Sun, Moon, Cloud, CloudRain, CloudFog, Snowflake, CloudLightning } from "lucide-react";
-import { demoEvents } from "@/lib/demo-data";
+import { Button } from "@/components/ui/button";
+import { AgendaPanel } from "@/components/cerebro/AgendaPanel";
+import { useNavigate } from "@tanstack/react-router";
+import { useTimer, updateTimer, startTimer } from "@/lib/timer-store";
+import { dayKey } from "@/lib/pomodoro";
+import { prepareSessionDisplay } from "@/lib/device-apis";
 import { describe, fetchWeather, geocodeCity, usePlace } from "@/lib/weather";
 import { useTasks, toggleDone } from "@/lib/board";
 import { areaStyle } from "@/lib/areas";
@@ -66,7 +71,7 @@ function Clima() {
     );
   const Icon = data ? weatherIcon(data.code, data.isDay) : Cloud;
   return (
-    <button onClick={() => setEditing(true)} className="mt-4 flex min-h-12 items-center gap-4 rounded-2xl text-left active:opacity-70" aria-label={`Clima en ${place.name}. Cambiar ciudad`}>
+    <Button variant="ghost" onClick={() => setEditing(true)} className="mt-4 flex min-h-12 items-center gap-4 rounded-2xl text-left active:opacity-70" aria-label={`Clima en ${place.name}. Cambiar ciudad`}>
       {isLoading ? (
         <span className="text-sm text-muted-foreground">Consultando el clima…</span>
       ) : isError || !data ? (
@@ -77,104 +82,30 @@ function Clima() {
           <span className="font-mono text-4xl font-medium tabular-nums">{data.temp}°</span>
           <span className="leading-tight">
             <span className="block text-sm">{describe(data.code)}</span>
-            <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{place.name} · {data.max}°/{data.min}°</span>
+            <span className="flex items-center gap-1 font-mono text-[13px] text-muted-foreground"><MapPin className="h-3 w-3" />{place.name} · Sensación {data.feels}°</span>
           </span>
         </>
       )}
-    </button>
+    </Button>
   );
 }
 
 function Ring({ done, total }: { done: number; total: number }) {
-  const r = 30, c = 2 * Math.PI * r, pct = total ? done / total : 0;
-  return (
-    <div className="relative h-20 w-20 shrink-0">
-      <svg viewBox="0 0 72 72" className="h-20 w-20 -rotate-90">
-        <circle cx="36" cy="36" r={r} fill="none" stroke="var(--border)" strokeWidth="6" />
-        <circle cx="36" cy="36" r={r} fill="none" stroke="var(--primary)" strokeWidth="6" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - pct)} style={{ transition: "stroke-dashoffset 0.6s ease" }} />
-      </svg>
-      <span className="absolute inset-0 grid place-items-center font-mono text-sm font-medium tabular-nums">{done}/{total}</span>
-    </div>
-  );
+ const pct = total ? Math.round(done / total * 100) : 0;
+ return <div className="relative h-20 w-20 shrink-0"><svg viewBox="0 0 80 80" className="h-full w-full -rotate-90"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" strokeWidth="6" /><circle cx="40" cy="40" r="32" fill="none" stroke="var(--primary)" strokeWidth="6" strokeDasharray="201.06" strokeDashoffset={201.06 * (1-pct/100)} strokeLinecap="round" /></svg><span className="absolute inset-0 grid place-items-center font-mono text-base">{pct}%</span></div>;
 }
-
 function Tareas() {
-  const tasks = useTasks();
-  const done = tasks.filter((t) => t.col === "done").length;
-  const ordered = [...tasks.filter((t) => t.col === "doing"), ...tasks.filter((t) => t.col === "todo"), ...tasks.filter((t) => t.col === "done")];
-  return (
-    <section className="flex min-h-0 flex-col rounded-3xl surface p-6" aria-label="Tareas de hoy">
-      <div className="flex items-center gap-5">
-        <Ring done={done} total={tasks.length} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2"><p className="label-os">tareas de hoy</p><span className="label-os">· demo</span></div>
-          <p className="mt-1 text-xl font-semibold">{done === tasks.length && tasks.length ? "Todo hecho." : `${tasks.length - done} pendientes`}</p>
-        </div>
-        <Link to="/tareas" className="flex min-h-11 items-center gap-1 rounded-full px-3 text-sm text-muted-foreground active:bg-accent">Kanban <ArrowUpRight className="h-4 w-4" /></Link>
-      </div>
-      <ul className="mt-4 -mx-2 overflow-y-auto">
-        {ordered.map((t) => {
-          const a = areaStyle(t.area);
-          const isDone = t.col === "done";
-          return (
-            <li key={t.id}>
-              <button onClick={() => toggleDone(t.id)} aria-pressed={isDone} className="flex min-h-14 w-full items-center gap-4 rounded-2xl px-2 py-2 text-left transition-colors active:bg-accent">
-                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 transition-colors ${isDone ? "border-primary bg-primary text-primary-foreground" : ""}`}>
-                  {isDone && <Check className="h-4 w-4 animate-reward" strokeWidth={3} />}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className={`block truncate text-base ${isDone ? "text-muted-foreground line-through" : ""}`}>{t.title}</span>
-                  <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <a.icon className="h-3.5 w-3.5" style={{ color: a.color }} /> {t.area}{t.col === "doing" && !isDone ? " · en proceso" : ""}
-                  </span>
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
+ const tasks = useTasks().filter((t) => t.col !== "unassigned"); const done = tasks.filter((t) => t.col === "done").length;
+ const ordered = [...tasks.filter((t) => t.col === "doing"), ...tasks.filter((t) => t.col === "todo"), ...tasks.filter((t) => t.col === "done")].slice(0,3);
+ return <section className="home-surface" aria-label="Tareas de hoy"><div className="flex items-center gap-5"><Ring done={done} total={tasks.length} /><div><Link to="/tareas" className="label-os inline-flex min-h-12 items-center">Tareas <ArrowUpRight size={18} /></Link><p className="text-xl font-semibold">{tasks.length - done} cosas en tu radar</p></div></div><ul className="mt-4 space-y-2">{ordered.map((t) => { const a = areaStyle(t.area); return <li key={t.id}><Button variant="ghost" onClick={() => toggleDone(t.id)} aria-pressed={t.col === "done"} className="home-task"><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 ${t.col === "done" ? "bg-primary border-primary text-primary-foreground" : ""}`}>{t.col === "done" && <Check size={18} />}</span><span className="min-w-0"><span className={`block whitespace-normal ${t.col === "done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</span><span className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground"><a.icon size={16} style={{ color: a.color }} />{t.area}{t.demo ? " · Demo" : ""}</span></span></Button></li>; })}</ul></section>;
 }
-
-function Agenda() {
-  return (
-    <Link to="/calendario" className="block rounded-3xl surface p-6 transition-transform active:scale-[0.99]" aria-label="Abrir calendario">
-      <div className="flex items-center justify-between">
-        <p className="label-os">próximo · demo</p>
-        <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <ul className="mt-4 space-y-1">
-        {demoEvents.map((e) => {
-          const a = areaStyle(e.area);
-          return (
-            <li key={e.title} className="flex min-h-14 items-center gap-4 border-l-2 pl-4" style={{ borderColor: a.color }}>
-              <span className="w-14 shrink-0 font-mono text-lg tabular-nums">{e.time}</span>
-              <span className="min-w-0">
-                <span className="block truncate text-base">{e.title}</span>
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><a.icon className="h-3.5 w-3.5" style={{ color: a.color }} />{e.area}</span>
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </Link>
-  );
+function Foco() {
+ const tasks = useTasks().filter((t) => t.col === "todo" || t.col === "doing"); const timer = useTimer(); const navigate = useNavigate(); const [choosing, setChoosing] = useState(false); const task = tasks.find((t) => t.id === timer.focusId) ?? tasks[0]; const active = timer.session?.state === "running" || timer.session?.state === "paused"; const [today] = useState(() => dayKey(Date.now()));
+ const a = areaStyle(task?.area ?? "Sistema");
+ return <section className="home-surface mt-6"><p className="label-os flex items-center gap-2"><a.icon size={18} style={{ color: a.color }} />Foco ahora</p><Button variant="ghost" className="my-3 h-auto min-h-14 w-full justify-start whitespace-normal px-0 text-left font-mono text-lg font-bold" onClick={() => setChoosing((v) => !v)}>{task?.title ?? "Sin tareas pendientes"}</Button>{choosing && <select className="tablet-input mb-3 w-full" aria-label="Elegir tarea en foco" value={task?.id ?? ""} onChange={(e) => { updateTimer((d) => ({ ...d, focusId: e.target.value })); setChoosing(false); }}>{tasks.map((t) => <option key={t.id} value={t.id}>{t.title}</option>)}</select>}<Button className="w-full" disabled={!task && !active} onClick={() => { if (active || (task && startTimer(task.id, timer.minutes))) { prepareSessionDisplay(); void navigate({ to: "/focus" }); } }}>{active ? "Volver al Pomodoro" : "Empezar"}</Button><div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Duración del Pomodoro">{([25,50] as const).map((min) => <Button key={min} variant={timer.minutes === min ? "secondary" : "ghost"} aria-pressed={timer.minutes === min} disabled={active} onClick={() => updateTimer((d) => ({ ...d, minutes: min }))}>{min} min</Button>)}</div><p className="mt-3 text-[13px] text-muted-foreground">{timer.history.filter((r) => r.day === today).length} pomodoros hoy{task?.demo ? " · Tarea Demo" : ""}</p></section>;
 }
-
 function Hoy() {
-  const m = useMoment();
-  return (
-    <main className="mx-auto max-w-[1180px] px-6 pt-2 md:px-8">
-      <section className="-mt-14 max-w-[60%]">
-        <h1 className="text-4xl font-semibold leading-tight md:text-5xl">{m.greet}, Bismarck.</h1>
-        <p className="mt-1 text-lg text-muted-foreground">{m.date.charAt(0).toUpperCase() + m.date.slice(1)}</p>
-        <Clima />
-      </section>
-      <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)]">
-        <Agenda />
-        <Tareas />
-      </div>
-    </main>
-  );
+ const m = useMoment(); const [clock, setClock] = useState("");
+ useEffect(() => { const update = () => setClock(new Date().toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })); update(); const id = setInterval(update, 15000); return () => clearInterval(id); }, []);
+ return <main className="home-layout"><aside className="home-left"><h1 className="text-3xl font-semibold leading-tight">{m.greet},<br />Bismarck.</h1><p className="mt-3 text-base capitalize text-muted-foreground">{m.date}</p><p className="mt-2 font-mono text-2xl">{clock || "—"}</p><Clima /><Foco /></aside><div className="home-right"><section className="home-surface"><Link to="/calendario" className="label-os inline-flex min-h-12 items-center gap-2">Calendario <ArrowUpRight size={18} /></Link><AgendaPanel compact /></section><Tareas /></div></main>;
 }
